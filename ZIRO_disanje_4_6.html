@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ZIRO · Vođeno disanje 4:6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#020b1a;overflow:hidden}
+
+#app{
+  width:100vw;height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  background:#020b1a;
+}
+#bg{position:absolute;inset:0;z-index:0}
+#ui{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;
+  align-items:center;width:100%;
+}
+
+/* ── ZIRO BRAND ── */
+#ziro-brand{
+  display:flex;flex-direction:column;
+  align-items:center;gap:5px;
+  margin-bottom:2rem;
+}
+#ziro-wordmark{
+  font-family:'Baloo 2',cursive;
+  font-size:clamp(50px,14vw,76px);
+  font-weight:800;
+  letter-spacing:0.14em;
+  color:#ffffff;
+  text-transform:uppercase;
+  line-height:1;
+  text-shadow:
+    0 0 40px rgba(90,160,255,0.45),
+    0 0 90px rgba(60,130,240,0.22);
+}
+#ziro-tagline{
+  font-family:'Poppins',sans-serif;
+  font-size:clamp(13px,3.8vw,17px);
+  font-weight:400;
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:rgba(190,225,255,0.88);
+}
+
+/* ── PHASE WORD ── */
+#phase-word{
+  font-family:'Nunito',sans-serif;
+  font-size:clamp(30px,8.5vw,46px);
+  font-weight:700;
+  letter-spacing:0.04em;
+  color:rgba(230,245,255,0.97);
+  margin-bottom:0.2rem;
+  min-height:54px;
+  text-align:center;
+  transition:color 0.9s;
+}
+#phase-word.exhale{
+  color:rgba(180,225,255,0.92);
+}
+
+/* ── COUNTER ── */
+#count-val{
+  font-family:'Poppins',sans-serif;
+  font-size:clamp(58px,16vw,86px);
+  font-weight:300;
+  color:rgba(210,238,255,0.72);
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+  margin-bottom:1.6rem;
+}
+
+/* ── WAVE ── */
+#wave-wrap{width:88%;max-width:420px}
+#main-canvas{display:block;width:100%;border-radius:10px}
+
+/* ── DOTS ── */
+#dots-section{
+  display:flex;flex-direction:column;align-items:center;
+  gap:9px;margin-top:1.2rem;
+  width:88%;max-width:420px;
+}
+#dots-row{
+  display:flex;align-items:center;
+  justify-content:center;width:100%;
+}
+#inhale-dots,#exhale-dots{display:flex;align-items:center;gap:5px;}
+.dot-sep{
+  width:0.5px;height:22px;
+  background:rgba(120,175,255,0.18);
+  margin:0 13px;flex-shrink:0;
+}
+
+/* inhale: id0=tiny → id3=big */
+.idot{
+  border-radius:50%;
+  background:rgba(100,170,255,0.14);
+  flex-shrink:0;
+  transition:background .3s,transform .25s;
+}
+#id0{width:5px;height:5px}
+#id1{width:7px;height:7px}
+#id2{width:9px;height:9px}
+#id3{width:12px;height:12px}
+
+/* exhale: ed0=big → ed5=tiny */
+.edot{
+  border-radius:50%;
+  background:rgba(100,170,255,0.14);
+  flex-shrink:0;
+  transition:background .3s,transform .25s;
+}
+#ed0{width:12px;height:12px}
+#ed1{width:10px;height:10px}
+#ed2{width:8px;height:8px}
+#ed3{width:7px;height:7px}
+#ed4{width:6px;height:6px}
+#ed5{width:5px;height:5px}
+
+.idot.on,.edot.on{
+  background:rgba(170,222,255,0.9);
+  transform:scale(1.18);
+}
+
+/* dot labels */
+#dots-labels{
+  display:flex;width:100%;
+  font-family:'Poppins',sans-serif;
+  font-size:clamp(11px,3vw,13px);
+  font-weight:400;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:rgba(195,228,255,0.82);
+}
+#label-in{flex:4;text-align:center;padding-right:12px}
+#label-ex{flex:6;text-align:center;padding-left:12px}
+
+/* tempo */
+#tempo-label{
+  font-family:'Poppins',sans-serif;
+  font-size:clamp(26px,7vw,36px);
+  font-weight:600;
+  letter-spacing:0.38em;
+  text-transform:uppercase;
+  color:rgba(240,250,255,0.96);
+  margin-top:1.2rem;
+  text-shadow:
+    0 0 20px rgba(150,210,255,0.45),
+    0 0 50px rgba(100,180,255,0.2);
+}
+
+
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="bg"></canvas>
+  <div id="ui">
+
+    <div id="ziro-brand">
+      <div id="ziro-wordmark">ZIRO</div>
+      <div id="ziro-tagline">Dobar dah</div>
+    </div>
+
+    <div id="phase-word">Udah</div>
+    <div id="count-val">4</div>
+
+    <div id="wave-wrap"><canvas id="main-canvas"></canvas></div>
+
+    <div id="dots-section">
+      <div id="dots-row">
+        <div id="inhale-dots">
+          <div class="idot on" id="id0"></div>
+          <div class="idot on" id="id1"></div>
+          <div class="idot on" id="id2"></div>
+          <div class="idot on" id="id3"></div>
+        </div>
+        <div class="dot-sep"></div>
+        <div id="exhale-dots">
+          <div class="edot" id="ed0"></div>
+          <div class="edot" id="ed1"></div>
+          <div class="edot" id="ed2"></div>
+          <div class="edot" id="ed3"></div>
+          <div class="edot" id="ed4"></div>
+          <div class="edot" id="ed5"></div>
+        </div>
+      </div>
+      <div id="dots-labels">
+        <div id="label-in">↑ udah · pluća se pune</div>
+        <div id="label-ex">pluća se prazne · izdah ↓</div>
+      </div>
+    </div>
+
+    <div id="tempo-label">4 · 6 tempo</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+const INHALE=4,EXHALE=6,TOTAL=10;
+const HISTORY=160;
+let audioCtx=null,lastPhase=null,startT=null,cycles=0;
+let waveData=new Array(HISTORY).fill(0);
+let particles=[];
+
+const bgC=document.getElementById('bg');
+const bc=bgC.getContext('2d');
+const mc=document.getElementById('main-canvas');
+const mx=mc.getContext('2d');
+const phaseWord=document.getElementById('phase-word');
+
+function resize(){
+  bgC.width=window.innerWidth;bgC.height=window.innerHeight;
+  const ww=document.getElementById('wave-wrap');
+  mc.width=ww.offsetWidth||360;
+  mc.height=Math.round((ww.offsetWidth||360)*0.36);
+}
+resize();window.addEventListener('resize',resize);
+
+function drawBg(t){
+  const w=bgC.width,h=bgC.height;
+  bc.clearRect(0,0,w,h);
+  bc.fillStyle='#020b1a';bc.fillRect(0,0,w,h);
+  for(let i=0;i<6;i++){
+    const x=w*(0.15+i*0.16+Math.sin(t*0.00028+i*1.6)*0.1);
+    const y=h*(0.1+i*0.15+Math.cos(t*0.00022+i*1.1)*0.08);
+    const r=Math.min(w,h)*(0.12+i*0.04+Math.sin(t*0.0003+i)*0.025);
+    const a=0.03+Math.sin(t*0.0004+i*0.65)*0.015;
+    const g=bc.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,`rgba(35,105,195,${a})`);
+    g.addColorStop(0.5,`rgba(20,60,140,${a*0.4})`);
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    bc.fillStyle=g;bc.beginPath();bc.arc(x,y,r,0,Math.PI*2);bc.fill();
+  }
+  for(let i=0;i<60;i++){
+    const sx=((i*127+t*0.0025*(i%3===0?1:-0.5))%w+w)%w;
+    const sy=((i*79+t*0.0018)%h+h)%h;
+    const a=0.08+Math.sin(t*0.0007+i)*0.07;
+    bc.fillStyle=`rgba(130,195,255,${a*0.38})`;
+    bc.beginPath();bc.arc(sx,sy,0.65,0,Math.PI*2);bc.fill();
+  }
+}
+
+function initParticles(){
+  particles=[];
+  for(let i=0;i<20;i++)particles.push({x:Math.random(),life:Math.random(),speed:0.25+Math.random()*0.4,phase:Math.random()*Math.PI*2});
+}
+initParticles();
+
+function drawWave(pos,phase,t){
+  const W=mc.width,H=mc.height;
+  if(!W||!H)return;
+  mx.clearRect(0,0,W,H);
+  const inhaling=phase==='inhale';
+  const breathVal=inhaling?(pos/INHALE):(1-(pos/EXHALE));
+  waveData.push(breathVal);
+  if(waveData.length>HISTORY)waveData.shift();
+  const CY=H/2;
+  for(let li=0;li<5;li++){
+    const alpha=0.05+li*0.03;
+    const ampBase=H*(0.07+li*0.055);
+    const freq=0.02-li*0.002;
+    const phaseOff=li*0.45+t*0.0009;
+    mx.beginPath();
+    for(let i=0;i<HISTORY;i++){
+      const x=(i/HISTORY)*W;
+      const bv=waveData[i];
+      const amp=ampBase*(0.25+bv*0.75);
+      const y=CY+Math.sin(i*freq*Math.PI*2+phaseOff)*amp*Math.sin(Math.PI*i/HISTORY);
+      i===0?mx.moveTo(x,y):mx.lineTo(x,y);
+    }
+    mx.strokeStyle=`rgba(75,165,255,${alpha})`;
+    mx.lineWidth=1.2+li*0.4;mx.stroke();
+  }
+  mx.beginPath();
+  for(let i=0;i<HISTORY;i++){
+    const x=(i/HISTORY)*W;
+    const bv=waveData[i];
+    const amp=H*(0.15+bv*0.22);
+    const y=CY+Math.sin(i*0.022*Math.PI*2+t*0.0012)*amp*Math.sin(Math.PI*i/HISTORY);
+    i===0?mx.moveTo(x,y):mx.lineTo(x,y);
+  }
+  mx.strokeStyle=`rgba(150,215,255,${0.5+breathVal*0.35})`;
+  mx.lineWidth=2;mx.stroke();
+  const bv0=waveData[waveData.length-1];
+  const amp0=H*(0.15+bv0*0.22);
+  const curY=CY+Math.sin((HISTORY-1)*0.022*Math.PI*2+t*0.0012)*amp0*Math.sin(Math.PI*(HISTORY-1)/HISTORY);
+  const pr=3+bv0*6;
+  mx.beginPath();mx.arc(W-2,curY,pr,0,Math.PI*2);
+  mx.fillStyle=`rgba(190,235,255,${0.55+bv0*0.35})`;mx.fill();
+  mx.beginPath();mx.arc(W-2,curY,pr+4,0,Math.PI*2);
+  mx.strokeStyle='rgba(160,215,255,0.2)';mx.lineWidth=1;mx.stroke();
+  particles.forEach(p=>{
+    p.life+=0.004*p.speed;
+    if(p.life>1){p.life=0;p.x=Math.random();p.phase=Math.random()*Math.PI*2;}
+    const px=((p.x+p.life*0.4)*W)%W;
+    const pAmp=H*(0.08+breathVal*0.15);
+    const py=CY+Math.sin(px/W*0.022*HISTORY*Math.PI*2+t*0.001+p.phase)*pAmp*(0.4+breathVal*0.5);
+    const a=(1-Math.abs(p.life*2-1))*0.4;
+    mx.beginPath();mx.arc(px,py,1.1,0,Math.PI*2);
+    mx.fillStyle=`rgba(210,238,255,${a})`;mx.fill();
+  });
+  const fade=mx.createLinearGradient(0,0,0,H);
+  fade.addColorStop(0,'rgba(2,11,26,0.5)');
+  fade.addColorStop(0.25,'rgba(0,0,0,0)');
+  fade.addColorStop(0.75,'rgba(0,0,0,0)');
+  fade.addColorStop(1,'rgba(2,11,26,0.5)');
+  mx.fillStyle=fade;mx.fillRect(0,0,W,H);
+}
+
+function updateDots(pos,phase){
+  if(phase==='inhale'){
+    const step=Math.floor((pos/INHALE)*4);
+    for(let i=0;i<4;i++){
+      const d=document.getElementById('id'+i);
+      if(d)d.className='idot'+(i<=step?' on':'');
+    }
+    for(let i=0;i<6;i++){
+      const e=document.getElementById('ed'+i);
+      if(e)e.className='edot';
+    }
+  } else {
+    for(let i=0;i<4;i++){
+      const d=document.getElementById('id'+i);
+      if(d)d.className='idot on';
+    }
+    // exhale: ed0(big) turns off first → ed5(tiny) turns off last
+    const step=Math.floor((pos/EXHALE)*6);
+    for(let i=0;i<6;i++){
+      const e=document.getElementById('ed'+i);
+      if(e)e.className='edot'+(i>=step?' on':'');
+    }
+  }
+}
+
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+
+function playBreath(isIn){
+  if(!audioCtx)return;
+  const dur=isIn?1.6:2.0;
+  const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*dur,audioCtx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/d.length);
+  const src=audioCtx.createBufferSource();src.buffer=buf;
+  const bpf=audioCtx.createBiquadFilter();bpf.type='bandpass';
+  bpf.frequency.value=isIn?850:550;bpf.Q.value=0.55;
+  const gain=audioCtx.createGain();
+  gain.gain.setValueAtTime(0,audioCtx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.15,audioCtx.currentTime+dur*0.3);
+  gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  src.connect(bpf);bpf.connect(gain);gain.connect(audioCtx.destination);
+  src.start();src.stop(audioCtx.currentTime+dur);
+}
+
+function speak(word){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(word);
+  u.lang='sr-RS';u.rate=0.75;u.pitch=1.05;u.volume=0.8;
+  const vs=window.speechSynthesis.getVoices();
+  const pref=vs.find(v=>v.lang&&(v.lang.startsWith('sr')||v.lang.startsWith('hr')));
+  const fallback=vs.find(v=>v.lang&&v.lang.startsWith('en'));
+  if(pref)u.voice=pref;else if(fallback){u.voice=fallback;u.lang='en-US';}
+  window.speechSynthesis.speak(u);
+}
+
+let ambientStarted=false;
+function startAmbient(){
+  if(ambientStarted||!audioCtx)return;
+  ambientStarted=true;
+  const chords=[[65.4,98,130.81,164.81],[55,82.4,110,138.6],[61.7,92.5,123.5,164.8]];
+  let ci=0;
+  function pad(){
+    const fs=chords[ci%chords.length];ci++;
+    fs.forEach((f,i)=>{
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type=i%2===0?'sine':'triangle';o.frequency.value=f;
+      g.gain.setValueAtTime(0,audioCtx.currentTime);
+      g.gain.linearRampToValueAtTime(0.014,audioCtx.currentTime+2.5);
+      g.gain.setValueAtTime(0.014,audioCtx.currentTime+9);
+      g.gain.linearRampToValueAtTime(0,audioCtx.currentTime+13);
+      o.connect(g);g.connect(audioCtx.destination);
+      o.start();o.stop(audioCtx.currentTime+13);
+    });
+    setTimeout(pad,11000);
+  }
+  pad();
+  let ni=0;
+  const notes=[196,220,261.63,246.94,220,196,174.6,196];
+  function melody(){
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sine';o.frequency.value=notes[ni%notes.length];ni++;
+    g.gain.setValueAtTime(0,audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(0.028,audioCtx.currentTime+0.8);
+    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+3.5);
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start();o.stop(audioCtx.currentTime+3.5);
+    setTimeout(melody,2800+Math.random()*2200);
+  }
+  setTimeout(melody,4000);
+}
+
+document.getElementById('app').addEventListener('click',()=>{
+  initAudio();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  startAmbient();
+  window.speechSynthesis&&window.speechSynthesis.getVoices();
+},{once:true});
+
+function tick(ts){
+  if(!startT)startT=ts;
+  const el=(ts-startT)/1000;
+  const pos=el%TOTAL;
+  const nc=Math.floor(el/TOTAL);
+  if(nc>cycles)cycles=nc;
+  const phase=pos<INHALE?'inhale':'exhale';
+  const tip=phase==='inhale'?pos:pos-INHALE;
+  const phaseDur=phase==='inhale'?INHALE:EXHALE;
+  const rem=Math.ceil(phaseDur-tip)||1;
+
+  if(phase!==lastPhase){
+    lastPhase=phase;
+    if(phase==='inhale'){
+      phaseWord.className='';
+      phaseWord.textContent='Udah';
+      if(audioCtx&&audioCtx.state==='running'){speak('udah');playBreath(true);}
+    } else {
+      phaseWord.className='exhale';
+      phaseWord.textContent='Izdah';
+      if(audioCtx&&audioCtx.state==='running'){speak('izdah');playBreath(false);}
+    }
+  }
+
+  document.getElementById('count-val').textContent=rem;
+  updateDots(tip,phase);
+  drawBg(ts);
+  drawWave(tip,phase,ts);
+  requestAnimationFrame(tick);
+}
+
+setTimeout(()=>{window.speechSynthesis&&window.speechSynthesis.getVoices();},500);
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
